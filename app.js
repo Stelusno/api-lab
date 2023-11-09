@@ -1,5 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
+var axios = require('axios');
+var port = 3000
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -22,6 +24,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+// Define a GET route for "/cats/fact"
+app.get('/cats/fact', async (req, res) => {
+  try {
+    // Make a GET request to the Cat Fact API
+    const response = await axios.get('https://catfact.ninja/fact');
+
+    // Extract the cat fact from the response data
+    const catFact = response.data.fact;
+
+     // Render the "cat/fact.ejs" template with the cat fact
+     res.render('cat/fact', {catFact});
+    } catch (error) {
+      // Handle any errors that occur during the request
+      console.error('Error:', error);
+      res.status(500).send('Error fetching cat fact');
+    }
+});
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
@@ -37,5 +57,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
 
 module.exports = app;
